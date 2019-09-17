@@ -1,4 +1,4 @@
-package rpc
+package main
 import (
 	"net/http"
 	"../core"
@@ -23,7 +23,7 @@ func blockchainGetHandler(w http.ResponseWriter,r *http.Request){
 }
 
 func blockchainWriteHandler(w http.ResponseWriter,r *http.Request){
-	blockData:=r.URL.Query().Get(key:"data")
+	blockData:=r.URL.Query().Get("data")
 	blockchain.SendData(blockData)
 	blockchainGetHandler(w,r)
 }
