@@ -3,8 +3,11 @@ import(
 	// "crypto/sha256"
 	// "encoding/hex"
 	"time"
+	"encoding/gob"
+	"log"
 	// "strconv"
-	// "bytes"
+	"bytes"
+	// "math/god"
 )
 /*
 	结构体定义区块 Block
@@ -63,4 +66,27 @@ func GenerateGenesisBlock() *Block{
 	// prevBlock.Hash=[]byte()
 	// return GenerateNewBlock(prevBlock,"sss")
 	return NewBlock([]byte{},"First Block")
+}
+
+//序列化,把对象转为二进制字节集，可以写入文件
+func (block *Block) Serialize() []byte{
+	var result bytes.Buffer  //开辟内存，存放字节集合
+	encoder:=gob.NewEncoder(&result)  //编码
+	err:=encoder.Encode(block)
+	if err!=nil{
+		log.Panic(err)
+	}
+	return result.Bytes()
+
+}
+
+//二进制字节集转化为对象
+func DeserializeBlock(data []byte) *Block{
+	var block Block //存储用于字节转化的对象
+	decoder:=gob.NewDecoder(bytes.NewReader(data))  //解码
+	err:=decoder.Decode(&block) //尝试解码
+	if err!=nil{
+		log.Panic(err) //处理错误
+	}
+	return &block
 }
