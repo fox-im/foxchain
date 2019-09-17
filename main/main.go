@@ -1,7 +1,10 @@
 package main
 
 import "../core"
-import "fmt"
+import(
+	"strconv"
+	"fmt"
+) 
 func main(){
 	// bc:=core.NewBlockchain()
 	// bc.SendData("Send 1 BTC to fox1");
@@ -18,6 +21,8 @@ func main(){
 		fmt.Printf("数据%s",block.Data)
 		fmt.Println("\n")
 		fmt.Printf("当前hash%x",block.Hash)
+		pow:=core.NewProofOfWork(block) //校验工作量
+		fmt.Printf("pow %s\n",strconv.FormatBool(pow.Validate()))
 		fmt.Println("\n")
 		fmt.Println("\n")
 	}

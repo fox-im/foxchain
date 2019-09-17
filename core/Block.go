@@ -1,10 +1,10 @@
 package core
 import(
-	"crypto/sha256"
+	// "crypto/sha256"
 	// "encoding/hex"
 	"time"
-	"strconv"
-	"bytes"
+	// "strconv"
+	// "bytes"
 )
 /*
 	结构体定义区块 Block
@@ -15,6 +15,7 @@ type Block struct{
 	PrevBlockHash []byte //上一个区块的哈希值
 	Hash []byte //当前区块哈希值
 	Data []byte //区块数据
+	Nonce int //工作量证明
 }
 
 // //生成hash
@@ -24,16 +25,16 @@ type Block struct{
 // 	return hex.EncodeToString(hashInBytes[:])
 // }
 
-func (block *Block)SetHash(){
-	//处理当前的时间，转为10进制的字符串，再转化为字节集合
-	timestamp:=[]byte(strconv.FormatInt(block.Timestamp,10))
-	//叠加需要去hash的数据
-	headers:=bytes.Join([][]byte{block.PrevBlockHash,block.Data,timestamp},[]byte{})
-	//计算出hash
-	hash:=sha256.Sum256(headers)
-	//赋值
-	block.Hash=hash[:] 
-}
+// func (block *Block)SetHash(){
+// 	//处理当前的时间，转为10进制的字符串，再转化为字节集合
+// 	timestamp:=[]byte(strconv.FormatInt(block.Timestamp,10))
+// 	//叠加需要去hash的数据
+// 	headers:=bytes.Join([][]byte{block.PrevBlockHash,block.Data,timestamp},[]byte{})
+// 	//计算出hash
+// 	hash:=sha256.Sum256(headers)
+// 	//赋值
+// 	block.Hash=hash[:] 
+// }
 
 //生成一个区块
 // func GenerateNewBlock(prevBlock Block,data string ) *Block{
@@ -47,8 +48,12 @@ func (block *Block)SetHash(){
 // }
 func NewBlock(prevBlockHash []byte,data string ) *Block{
 	//newBlock是指针，指向初始化对象
-	newBlock :=&Block{Timestamp:time.Now().Unix(),Data:[]byte(data),PrevBlockHash:prevBlockHash,Hash:[]byte{}}
-	newBlock.SetHash()
+	newBlock :=&Block{Timestamp:time.Now().Unix(),Data:[]byte(data),PrevBlockHash:prevBlockHash,Hash:[]byte{},Nonce:0}
+	// newBlock.SetHash()
+	pow:=NewProofOfWork(newBlock) //挖矿附加这个区块
+	nonce,hash:=pow.Run() //开始挖矿
+	newBlock.Hash=hash[:]
+	newBlock.Nonce=nonce
 	return newBlock
 }
 //创世区块
