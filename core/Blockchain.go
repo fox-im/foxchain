@@ -15,8 +15,8 @@ const blockBucket="blocks" //名称
 */
 type Blockchain struct{
 	// Blocks []*Block   //一个存储Block指针地址的数组,
-	tip []byte //二进制数组
-	db *bolt.DB //数据库
+	Tip []byte //二进制数组
+	DB *bolt.DB //数据库
 }
 
 type BlockchainIterator struct{
@@ -27,7 +27,7 @@ type BlockchainIterator struct{
 //将区块添加到链上
 func (block *Blockchain) AddBlock(data string){
 		var lastHash []byte  //上一块hash
-		err:=block.db.View(func (tx *bolt.Tx) error{
+		err:=block.DB.View(func (tx *bolt.Tx) error{
 			block:=tx.Bucket([]byte(blockBucket))  //取得数据
 			lastHash=block.Get([]byte("1")) //取得第一块
 			return nil
@@ -36,7 +36,7 @@ func (block *Blockchain) AddBlock(data string){
 			log.Panic(err)  //处理打开错误
 		}
 		newBlock:=NewBlock(lastHash,data) //创建一个新的区块
-		err=block.db.Update(func (tx *bolt.Tx) error{
+		err=block.DB.Update(func (tx *bolt.Tx) error{
 			bucket :=tx.Bucket([]byte(blockBucket))  //取出
 			err:=bucket.Put(newBlock.Hash,newBlock.Serialize()) //压入数据
 			if err!=nil{
@@ -46,14 +46,14 @@ func (block *Blockchain) AddBlock(data string){
 			if err!=nil{
 				log.Panic(err)  //处理压入错误
 			}
-			block.tip=newBlock.Hash
+			block.Tip=newBlock.Hash
 			return nil
 		})
 }
 
 //迭代器
 func (block *Blockchain) Iterator() *BlockchainIterator{
-	bcit:=&BlockchainIterator{currentHash:block.tip,db:block.db}  //根据区块链创建区块链迭代器
+	bcit:=&BlockchainIterator{currentHash:block.Tip,db:block.DB}  //根据区块链创建区块链迭代器
 	return bcit
 }
 
@@ -77,6 +77,7 @@ func (it *BlockchainIterator) next() *Block{
 
 //新建一个区块链
 func NewBlockchain() *Blockchain{
+	// fmt.Println("开始")
 	var tip []byte //存储区块链的二进制数据
 	db,err:=bolt.Open(dbFile,0600,nil) //打开数据库
 	if err!=nil{
@@ -85,7 +86,7 @@ func NewBlockchain() *Blockchain{
 	err=db.Update(func (tx *bolt.Tx) error{
 		bucket:=tx.Bucket([]byte(blockBucket)) //按照名称打开数据库的表格
 		if bucket==nil{
-			fmt.Println("当前数据库没有区块链，创建一个新的")
+			fmt.Println("*******当前数据库没有区块链，创建一个新的")
 			genesis:=GenerateGenesisBlock() //创建创世区块
 			bucket,err:=tx.CreateBucket([]byte(blockBucket)) //创建一个数据库的表格
 			if err!=nil{
@@ -108,7 +109,14 @@ func NewBlockchain() *Blockchain{
 	if err!=nil{
 		log.Panic(err)  //处理数据库更新错误
 	}
-	bc:=Blockchain{tip:tip,db:db}
+	
+	bc:=Blockchain{Tip:tip,DB:db}
+	// ll :=Lll{a:"sspp"}
+	// fmt.Println("结算苏")
+	// fmt.Printf("%v",ll.a)
+	// fmt.Printf("%v",bc.db)
+	// fmt.Println("结算苏222")
+	// fmt.Println(&bc.tip)
 	return &bc
 }
 
