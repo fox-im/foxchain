@@ -27,7 +27,7 @@ func main(){
 	// 	fmt.Println("\n")
 	// 	fmt.Println("\n")
 	// }
-	block :=core.NewBlockchain() //创建区块链
+	block :=core.NewBlockchain("我是一个地址") //创建区块链
 	// fmt.Println("sss")
 	// fmt.Printf("%v",block)
 	defer block.DB.Close() //延迟关闭数据库

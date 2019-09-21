@@ -1,6 +1,6 @@
 package core
 import(
-	// "crypto/sha256"
+	"crypto/sha256"
 	// "encoding/hex"
 	"time"
 	"encoding/gob"
@@ -17,8 +17,21 @@ type Block struct{
 	Timestamp int64 //时间戳
 	PrevBlockHash []byte //上一个区块的哈希值
 	Hash []byte //当前区块哈希值
-	Data []byte //区块数据
+	// Data []byte //区块数据
+	Transaction []*Transaction //交易集合
 	Nonce int //工作量证明
+}
+
+
+//对交易进行hash计算
+func (block *Block) HashTransactions() []byte{
+	var txHashes[][]byte
+	var txHash[32]byte
+	for _,tx:=range block.Transaction{
+		txHashes=append(txHashes,tx.ID)
+	}
+	txHash=sha256.Sum256(bytes.Join(txHashes,[]byte{}))
+	return txHash[:]
 }
 
 // //生成hash
@@ -49,9 +62,16 @@ type Block struct{
 // 	newBlock.Hash=calculateHash(newBlock)
 // 	return newBlock
 // }
-func NewBlock(prevBlockHash []byte,data string ) *Block{
+
+//创建一个区块
+func NewBlock(prevBlockHash []byte,transactions []*Transaction ) *Block{
 	//newBlock是指针，指向初始化对象
-	newBlock :=&Block{Timestamp:time.Now().Unix(),Data:[]byte(data),PrevBlockHash:prevBlockHash,Hash:[]byte{},Nonce:0}
+	newBlock :=&Block{
+		Timestamp:time.Now().Unix(),
+		Transaction:transactions,
+		PrevBlockHash:prevBlockHash,
+		Hash:[]byte{},
+		Nonce:0}
 	// newBlock.SetHash()
 	pow:=NewProofOfWork(newBlock) //挖矿附加这个区块
 	nonce,hash:=pow.Run() //开始挖矿
@@ -60,12 +80,12 @@ func NewBlock(prevBlockHash []byte,data string ) *Block{
 	return newBlock
 }
 //创世区块
-func GenerateGenesisBlock() *Block{
+func GenerateGenesisBlock(coinbase *Transaction) *Block{
 	// prevBlock := Block{}
 	// prevBlock.Index=-1
 	// prevBlock.Hash=[]byte()
 	// return GenerateNewBlock(prevBlock,"sss")
-	return NewBlock([]byte{},"First Block")
+	return NewBlock([]byte{},[]*Transaction{coinbase})
 }
 
 //序列化,把对象转为二进制字节集，可以写入文件
